@@ -23,41 +23,53 @@ labeler(X) :-
 check_len(N,X) :-
 	length(X,N) . 
 
+%%https://stackoverflow.com/questions/19798844/finding-the-max-in-a-list-prolog
+my_max([], R, Count, Count). %end
+my_max([X|Xs], WK, Count, R):- X >  WK, my_max(Xs, X, Count+1, R). %WK is Carry about
+my_max([X|Xs], WK, Count, R):- X =< WK, my_max(Xs, WK, Count, R).
+my_max([X|Xs], R):- my_max(Xs, X, 1, R). %start
 
-unique([]).
-unique([X|Xs]) :- \+ memberchk(X, Xs), unique(Xs).
+
+num_towers(X,W) :-
+	my_max(X,C) , 
+	W is C .  
+
+check_side([],[]) .
+check_side([Row|Rest],[Constrain|Tail]) :- 
+	num_towers(Row,Constrain),
+	check_side(Rest,Tail) .
+
+reverse_grid([], Rev, Rev).
+reverse_grid([Hd|Tl], Rev, X) :-
+	reverse(Hd, Dh), append(Rev,[Dh], NList) ,reverse_grid(Tl, NList, X).
+reverse_grid([Hd|Tl], X) :-
+	reverse(Hd, Dh), reverse_grid(Tl, [Dh], X).
+
+
+check_grid(T,C) :-
+	transpose(T,Ts),
+	nth(1,C,Top),
+	check_side(Ts,Top),
+	nth(3,C,Left),
+	check_side(T,Left),
+	reverse_grid(T,Rev_T),
+	reverse_grid(Ts,Rev_Ts), 
+	nth(2,C,Bottom),
+	check_side(Rev_Ts,Bottom),
+	nth(4,C,Right),
+	check_side(Rev_T,Right).
 
 tower(N,T,C) :- 
 	length(T,N), %%total number of rows ic correct
 	transpose(T,Ts),
+	length(C,4),
 	maplist(check_len(N),T), %%size of each row is correct
 	maplist(check_len(N),Ts),
 	maplist(fd_all_different,T),
     maplist(fd_all_different,Ts),
+    check_grid(T,C),
 	maplist(applier(N),T) ,
 	maplist(labeler,T) . %%size of each column is correct
-
-
-
-
-
-
-
-
-%% goal(L1,X) :- 
-%% 	member(X,L1) . 		
-
-%% lister(L) :- 
-%% 	maplist(goal(L),L) .
-
-
-%% tower(5,
-%%          [[2,3,4,5,1],
-%%           [5,4,1,3,2],
-%%           [4,1,5,2,3],
-%%           [1,2,3,4,5],
-%%           [3,5,2,1,4]],
-%%          C).
 
 
 
