@@ -14,23 +14,29 @@ lists_firsts_rests([], [], []).
 lists_firsts_rests([[F|Os]|Rest], [F|Fs], [Os|Oss]) :-
         lists_firsts_rests(Rest, Fs, Oss).
 
+applier(N,X) :- 
+	fd_domain(X,1,N) .
 
+labeler(X) :-
+	fd_labeling(X) .
+
+check_len(N,X) :-
+	length(X,N) . 
 
 
 unique([]).
 unique([X|Xs]) :- \+ memberchk(X, Xs), unique(Xs).
 
 tower(N,T,C) :- 
-	%% forall(member(A,T),fd_domain(A,1,N)) ,
-	%% forall(member(A,T),fd_labeling(A)) ,
 	length(T,N), %%total number of rows ic correct
-	forall(member(A,T),length(A,N)) , %%size of each row is correct
-	forall(member(A,T),unique(A)) , %%make sure that the rows contain all unique elements.
-	transpose(T,Ts) , %% rows -> columns 
-	forall(member(A,Ts),length(A,N)) , %%size of each column is correct
-	forall(member(A,Ts),unique(A)) ,
-	forall(member(A,T),fd_domain(A,1,N)) ,
-	forall(member(A,T),fd_labeling(A)) .
+	transpose(T,Ts),
+	maplist(check_len(N),T), %%size of each row is correct
+	maplist(check_len(N),Ts),
+	maplist(fd_all_different,T),
+    maplist(fd_all_different,Ts),
+	maplist(applier(N),T) ,
+	maplist(labeler,T) . %%size of each column is correct
+
 
 
 
@@ -52,3 +58,6 @@ tower(N,T,C) :-
 %%           [1,2,3,4,5],
 %%           [3,5,2,1,4]],
 %%          C).
+
+
+
