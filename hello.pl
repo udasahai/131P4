@@ -46,6 +46,11 @@ reverse_grid([Hd|Tl], X) :-
 	reverse(Hd, Dh), reverse_grid(Tl, [Dh], X).
 
 
+count_to_list([],L,L).
+count_to_list(counts(A,B,C,D),L) :-
+	count_to_list([],[A,B,C,D],L).
+
+
 check_grid(T,C) :-
 	transpose(T,Ts),
 	nth(1,C,Top),
@@ -62,12 +67,12 @@ check_grid(T,C) :-
 tower(N,T,C) :- 
 	length(T,N), %%total number of rows ic correct
 	transpose(T,Ts),
-	length(C,4),
 	maplist(check_len(N),T), %%size of each row is correct
 	maplist(check_len(N),Ts),
 	maplist(fd_all_different,T),
     maplist(fd_all_different,Ts),
-    check_grid(T,C),
+    count_to_list(C,New),
+    check_grid(T,New),
 	maplist(applier(N),T) ,
 	maplist(labeler,T) . %%size of each column is correct
 
