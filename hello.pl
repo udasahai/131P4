@@ -75,5 +75,39 @@ tower(N,T,C) :-
     check_grid(T,Ts,New),
 	maplist(labeler,T) . %%size of each column is correct
 
+do_list(N, L):- 
+  findall(Num, between(1, N, Num), L).
+
+plain_tower(N,T,C) :- 
+	length(T,N), %%total number of rows ic correct
+	maplist(check_len(N),T), %%size of each row is correct
+	do_list(N,Perm),
+	forall(member(I,T), permutation(I,Perm)),
+	transpose(T,Ts),
+	maplist(check_len(N),Ts),
+	forall(member(Is,Ts), permutation(Is,Perm)),
+    count_to_list(C,New),
+    check_grid(T,Ts,New). %%size of each column is correct
+
+
+speedup(R) :- 
+	statistics(cpu_time,[Start|_]), 
+	plain_tower(4,[[1,2,3,4],[2,3,4,1],[3,4,1,2],[4,1,2,3]] ,C) ,
+	statistics(cpu_time,[Stop|_]),
+	Plaintower is Stop-Start,
+	statistics(cpu_time,[Go|_]), 
+	tower(4,[[1,2,3,4],[2,3,4,1],[3,4,1,2],[4,1,2,3]] ,C) ,
+	statistics(cpu_time,[End|_]),
+	Tower is Go-End, 
+	R is 3/2 . 
+
+
+ ambiguous(N, C, T1, T2) :- 
+ 	tower(N,T1,C), 
+ 	T1\=T2,
+ 	tower(N,T2,C). 
+
+
+
 
 
