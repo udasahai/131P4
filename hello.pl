@@ -25,8 +25,8 @@ check_len(N,X) :-
 
 %%https://stackoverflow.com/questions/19798844/finding-the-max-in-a-list-prolog
 my_max([], R, Count, Count). %end
-my_max([X|Xs], WK, Count, R):- X >  WK, my_max(Xs, X, Count+1, R). %WK is Carry about
-my_max([X|Xs], WK, Count, R):- X =< WK, my_max(Xs, WK, Count, R).
+my_max([X|Xs], WK, Count, R):- X #>  WK, my_max(Xs, X, Count+1, R). %WK is Carry about
+my_max([X|Xs], WK, Count, R):- X #=< WK, my_max(Xs, WK, Count, R).
 my_max([X|Xs], R):- my_max(Xs, X, 1, R). %start
 
 
@@ -51,8 +51,7 @@ count_to_list(counts(A,B,C,D),L) :-
 	count_to_list([],[A,B,C,D],L).
 
 
-check_grid(T,C) :-
-	transpose(T,Ts),
+check_grid(T,Ts,C) :-
 	nth(1,C,Top),
 	check_side(Ts,Top),
 	nth(3,C,Left),
@@ -66,14 +65,14 @@ check_grid(T,C) :-
 
 tower(N,T,C) :- 
 	length(T,N), %%total number of rows ic correct
-	transpose(T,Ts),
 	maplist(check_len(N),T), %%size of each row is correct
+	maplist(applier(N),T) ,
+	transpose(T,Ts),
 	maplist(check_len(N),Ts),
 	maplist(fd_all_different,T),
     maplist(fd_all_different,Ts),
     count_to_list(C,New),
-    check_grid(T,New),
-	maplist(applier(N),T) ,
+    check_grid(T,Ts,New),
 	maplist(labeler,T) . %%size of each column is correct
 
 
