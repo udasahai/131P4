@@ -75,31 +75,78 @@ tower(N,T,C) :-
     check_grid(T,Ts,New),
 	maplist(labeler,T) . %%size of each column is correct
 
+assign(N,R) :- 
+	R #>= 1,
+	R #=< N. 
+
+check_perm(N,X) :- 
+	maplist(assign(N),X) .
+
+is_set(Lst) :-
+    sort(Lst, Set),
+    length(Lst, N),
+    length(Set, N).
 do_list(N, L):- 
   findall(Num, between(1, N, Num), L).
 
 plain_tower(N,T,C) :- 
-	length(T,N), %%total number of rows ic correct
-	maplist(check_len(N),T), %%size of each row is correct
-	do_list(N,Perm),
-	forall(member(I,T), permutation(I,Perm)),
+	length(T,N),
+	maplist(check_len(N),T),
 	transpose(T,Ts),
 	maplist(check_len(N),Ts),
-	forall(member(Is,Ts), permutation(Is,Perm)),
-    count_to_list(C,New),
-    check_grid(T,Ts,New). %%size of each column is correct
+	maplist(check_perm(N),T),
+	do_list(N,Perm),
+	count_to_list(C,New),
+	maplist(permutation(Perm),T), 
+	maplist(permutation(Perm),Ts),
+	transpose(Ts,Nt),
+	Nt=T,
+	check_grid(T,Ts,New). 
+
+
+
+%% plain_tower(N,T,C) :- 
+%% 	count_to_list(C,New),
+%% 	length(T,N), %%total number of rows ic correct
+%% 	maplist(check_len(N),T), %%size of each row is correct
+%% 	maplist(check_perm(N),T),
+%% 	maplist(is_set,T),
+%% 	transpose(T,Ts),
+%% 	maplist(check_len(N),Ts),
+%% 	maplist(is_set, Ts),
+%% 	transpose(Ts,Nt), 
+%% 	Nt=T, 
+%%     check_grid(T,Ts,New). %%size of each column is correct
+ 
+  
 
 
 speedup(R) :- 
 	statistics(cpu_time,[Start|_]), 
-	plain_tower(4,[[1,2,3,4],[2,3,4,1],[3,4,1,2],[4,1,2,3]] ,C) ,
+	plain_tower(5,
+         [[2,3,4,5,1],
+          [5,4,1,3,2],
+          Row3,
+          [RC41,5|Row4Tail],
+          Row5],
+         counts(Top, [4|BottomTail],
+                [Left1,Left2,Left3,Left4,5],
+                Right)),
 	statistics(cpu_time,[Stop|_]),
 	Plaintower is Stop-Start,
 	statistics(cpu_time,[Go|_]), 
-	tower(4,[[1,2,3,4],[2,3,4,1],[3,4,1,2],[4,1,2,3]] ,C) ,
+	tower(5,
+         [[2,3,4,5,1],
+          [5,4,1,3,2],
+          Row3,
+          [RC41,5|Row4Tail],
+          Row5],
+         counts(Top, [4|BottomTail],
+                [Left1,Left2,Left3,Left4,5],
+                Right)),
 	statistics(cpu_time,[End|_]),
-	Tower is Go-End, 
-	R is 3/2 . 
+	Tower is End-Go, 
+	R is Tower . 
 
 
  ambiguous(N, C, T1, T2) :- 
